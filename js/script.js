@@ -4,31 +4,60 @@ let actions = document.getElementById("action");
 let todos = [];
 
 const displayTodos = () => {
-    let displayTodo = ''
+    let displayTodo = '';
     
     todos.forEach(function(item, i){
-        displayTodo += `<tr id="item_${i}">
+        displayTodo += !item.editing ? `<tr id="item_${i}">
             <td>
                 <label>
                     <input type="checkbox" />
                 <span></span>
+                </label>
             </td>
-            </label>
             <td id="text_${i}">${item.action}</td>
             <td>${item.date}</td>
-            <th>
+            <td>
                 <a class="waves-effect waves-teal btn-flat" id="edit_${i}">
                     Edit
                 </a>
-            </th>
-            <th>
+            </td>
+            <td>
                 <a class="waves-effect red accent-4 btn-small" id="delete_${i}">
                     X
                 </a>
-            </th>
-        </tr>`
+            </td>
+        </tr>
+        `
+        :
+        displayTodo += `<tr id="item_${i}">
+                <td>
+                    <label>
+                        <input type="checkbox" />
+                    <span></span>
+                    </label>
+                </td>
+                <td id="text_${i}">
+                    <input value="${item.action}" id="todo_${i}" type="text" />    
+                </td>
+                <td>
+                    <input value="${item.date}" id="date_${i}" type="text" />    
+                </td>
+                <td>
+                    <a class="waves-effect waves-teal btn-flat">
+                        Edit
+                    </a>
+                </th>
+                <td>
+                    <a class="waves-effect green accent-4 btn-small" id="save_${i}">
+                        SAVE
+                    </a>
+                </td>
+            </tr>
+        `
+       
             actions.innerHTML = displayTodo;
     })   
+
     
     if(todos[0] == null) {
         actions.innerHTML = displayTodo;
@@ -53,6 +82,7 @@ button.addEventListener('click', function() {
         checked: false,
         date: date,
         important: false,
+        editing: false,
     }
     input.value = '';
 
@@ -63,31 +93,35 @@ button.addEventListener('click', function() {
 
 const editToDo = (todoId) => {
     let editable = todos[todoId];
-    let message = ''
-    let editSelector = document.getElementById(`item_${todoId}`);
-    message = `<h1>Проверка редактирования<h1>`;
-    editSelector.innerHTML += message;
+    editable.editing = true;
+}
+
+const saveEditingToDo = (todoId) => {
+    let newInput = document.getElementById(`todo_${todoId}`)
+    let newDate = document.getElementById(`date_${todoId}`)
+    todos[todoId].action = newInput.value;
+    todos[todoId].date = newDate.value;
+    todos[todoId].editing = false;
     
 }
 
 actions.addEventListener('click', function(e) {
     todoId = e.target.id.replace(/\D+/g,"");
-    if(e.target.id.slice(1,2) === 'e') {
-        delete todos[todoId]
-        localStorage.setItem('todo', JSON.stringify(todos));
-    } else if (e.target.id.slice(1,2) === 'd') {
-        editToDo(todoId);
+    temp = e.target.id.slice(0,2);
+
+    switch(temp) {
+        case 'de':
+            delete todos[todoId]
+            displayTodos();
+            break;
+        case 'ed':
+            editToDo(todoId);
+            displayTodos();
+            break;
+        case 'sa':
+            saveEditingToDo(todoId);
+            displayTodos();
+            break;
     }
-    displayTodos();
+    localStorage.setItem('todo', JSON.stringify(todos));
 })
-
-// TODO: complete todo editing 
-// actions.addEventListener('dblclick', function(e){
-//     todoId = e.target.id.replace(/\D+/g,"");
-    
-// })
-
-// actions.addEventListener('click', function(e) {
-//     editId = e.target.id.slice(5,6);
-//     console.log(editId)
-// })
